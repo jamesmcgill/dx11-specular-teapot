@@ -74,8 +74,7 @@ Game::Render()
 	m_deviceResources->PIXBeginEvent(L"Render");
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
-	// TODO: Add your rendering code here.
-	context;
+	m_teapotMesh->Draw(m_basicEffect.get(), m_inputLayout.Get());
 
 	m_deviceResources->PIXEndEvent();
 
@@ -149,9 +148,8 @@ Game::OnWindowSizeChanged(int width, int height)
 void
 Game::GetDefaultSize(int& width, int& height) const
 {
-	// TODO: Change to desired default window size (note minimum size is 320x200).
-	width	= 800;
-	height = 600;
+	width	= 1024;
+	height = 768;
 }
 #pragma endregion
 
@@ -162,9 +160,13 @@ Game::CreateDeviceDependentResources()
 {
 	auto device = m_deviceResources->GetD3DDevice();
 
-	// TODO: Initialize device dependent objects here (independent of window
-	// size).
-	device;
+	m_basicEffect
+		= std::make_unique<BasicEffect>(m_deviceResources->GetD3DDevice());
+
+	m_teapotMesh = GeometricPrimitive::CreateTeapot(
+		m_deviceResources->GetD3DDeviceContext());
+
+	m_teapotMesh->CreateInputLayout(m_basicEffect.get(), &m_inputLayout);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
