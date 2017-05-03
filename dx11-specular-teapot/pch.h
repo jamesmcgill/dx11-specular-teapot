@@ -35,6 +35,16 @@
 #include <DirectXMath.h>
 #include <DirectXColors.h>
 
+// DirectXTK
+#include "CommonStates.h"
+#include "GeometricPrimitive.h"
+#include "SimpleMath.h"
+#include "Effects.h"
+#include "Model.h"
+#include "PrimitiveBatch.h"
+#include "VertexTypes.h"
+#include "SimpleMath.h"
+
 #include <algorithm>
 #include <exception>
 #include <memory>
