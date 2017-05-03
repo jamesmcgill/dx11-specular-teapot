@@ -53,4 +53,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 	std::unique_ptr<DirectX::GeometricPrimitive> m_teapotMesh;
 	std::unique_ptr<DirectX::BasicEffect> m_basicEffect;
+	DirectX::SimpleMath::Matrix m_model;
+	DirectX::SimpleMath::Matrix m_view;
+	DirectX::SimpleMath::Matrix m_proj;
 };

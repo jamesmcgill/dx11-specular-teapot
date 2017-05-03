@@ -8,6 +8,7 @@
 extern void ExitGame();
 
 using namespace DirectX;
+using namespace DirectX::SimpleMath;
 
 using Microsoft::WRL::ComPtr;
 
@@ -73,6 +74,14 @@ Game::Render()
 
 	m_deviceResources->PIXBeginEvent(L"Render");
 	auto context = m_deviceResources->GetD3DDeviceContext();
+
+	// Setup Camera
+	static const Vector4 eye = { 0.0f, 0.7f, 1.5f, 0.0f };
+	static const Vector4 at = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const Vector4 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+	m_view = XMMatrixLookAtRH(eye, at, up);
+	m_basicEffect->SetView(m_view);
 
 	m_teapotMesh->Draw(m_basicEffect.get(), m_inputLayout.Get());
 
@@ -173,7 +182,17 @@ Game::CreateDeviceDependentResources()
 void
 Game::CreateWindowSizeDependentResources()
 {
-	// TODO: Initialize windows-size dependent objects here.
+	const float fovAngleY = 70.0f * XM_PI / 180.0f;
+	RECT outputSize		= m_deviceResources->GetOutputSize();
+	float aspectRatio = float(outputSize.right - outputSize.left)
+											/ (outputSize.bottom - outputSize.top);
+	
+	m_model = Matrix::Identity;
+	m_view = Matrix::Identity;
+	m_proj = Matrix::CreatePerspectiveFieldOfView(
+		fovAngleY, aspectRatio, 0.01f, 100.f);
+
+	m_basicEffect->SetProjection(m_proj);
 }
 
 void
