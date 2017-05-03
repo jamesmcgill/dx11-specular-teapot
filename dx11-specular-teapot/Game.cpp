@@ -1,7 +1,3 @@
-//
-// Game.cpp
-//
-
 #include "pch.h"
 #include "Game.h"
 
@@ -12,13 +8,20 @@ using namespace DirectX::SimpleMath;
 
 using Microsoft::WRL::ComPtr;
 
+//------------------------------------------------------------------------------
+constexpr float ROTATION_DEGREES_PER_SECOND = 45.f;
+
+//------------------------------------------------------------------------------
 Game::Game()
+		: m_rotationRadiansPS(XMConvertToRadians(ROTATION_DEGREES_PER_SECOND))
 {
 	m_deviceResources = std::make_unique<DX::DeviceResources>();
 	m_deviceResources->RegisterDeviceNotify(this);
 }
 
+//------------------------------------------------------------------------------
 // Initialize the Direct3D resources required to run.
+//------------------------------------------------------------------------------
 void
 Game::Initialize(HWND window, int width, int height)
 {
@@ -40,7 +43,9 @@ Game::Initialize(HWND window, int width, int height)
 }
 
 #pragma region Frame Update
+//------------------------------------------------------------------------------
 // Executes the basic game loop.
+//------------------------------------------------------------------------------
 void
 Game::Tick()
 {
@@ -49,19 +54,25 @@ Game::Tick()
 	Render();
 }
 
+//------------------------------------------------------------------------------
 // Updates the world.
+//------------------------------------------------------------------------------
 void
 Game::Update(DX::StepTimer const& timer)
 {
-	float elapsedTime = float(timer.GetElapsedSeconds());
+	float totalTimeS = float(timer.GetTotalSeconds());
 
-	// TODO: Add your game logic here.
-	elapsedTime;
+	double totalRotation = totalTimeS * m_rotationRadiansPS;
+	float radians				 = static_cast<float>(fmod(totalRotation, XM_2PI));
+
+	m_model = XMMatrixRotationY(radians);
 }
 #pragma endregion
 
 #pragma region Frame Render
+//------------------------------------------------------------------------------
 // Draws the scene.
+//------------------------------------------------------------------------------
 void
 Game::Render()
 {
@@ -76,12 +87,14 @@ Game::Render()
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
 	// Setup Camera
-	static const Vector4 eye = { 0.0f, 0.7f, 1.5f, 0.0f };
-	static const Vector4 at = { 0.0f, -0.1f, 0.0f, 0.0f };
-	static const Vector4 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+	static const Vector4 eye = {0.0f, 0.7f, 1.5f, 0.0f};
+	static const Vector4 at	= {0.0f, -0.1f, 0.0f, 0.0f};
+	static const Vector4 up	= {0.0f, 1.0f, 0.0f, 0.0f};
 
 	m_view = XMMatrixLookAtRH(eye, at, up);
 	m_basicEffect->SetView(m_view);
+
+	m_basicEffect->SetWorld(m_model);
 
 	m_teapotMesh->Draw(m_basicEffect.get(), m_inputLayout.Get());
 
@@ -91,7 +104,9 @@ Game::Render()
 	m_deviceResources->Present();
 }
 
+//------------------------------------------------------------------------------
 // Helper method to clear the back buffers.
+//------------------------------------------------------------------------------
 void
 Game::Clear()
 {
@@ -116,25 +131,30 @@ Game::Clear()
 #pragma endregion
 
 #pragma region Message Handlers
+//------------------------------------------------------------------------------
 // Message handlers
+//------------------------------------------------------------------------------
 void
 Game::OnActivated()
 {
 	// TODO: Game is becoming active window.
 }
 
+//------------------------------------------------------------------------------
 void
 Game::OnDeactivated()
 {
 	// TODO: Game is becoming background window.
 }
 
+//------------------------------------------------------------------------------
 void
 Game::OnSuspending()
 {
 	// TODO: Game is being power-suspended (or minimized).
 }
 
+//------------------------------------------------------------------------------
 void
 Game::OnResuming()
 {
@@ -143,6 +163,7 @@ Game::OnResuming()
 	// TODO: Game is being power-resumed (or returning from minimize).
 }
 
+//------------------------------------------------------------------------------
 void
 Game::OnWindowSizeChanged(int width, int height)
 {
@@ -153,7 +174,9 @@ Game::OnWindowSizeChanged(int width, int height)
 	// TODO: Game window is being resized.
 }
 
+//------------------------------------------------------------------------------
 // Properties
+//------------------------------------------------------------------------------
 void
 Game::GetDefaultSize(int& width, int& height) const
 {
@@ -163,7 +186,9 @@ Game::GetDefaultSize(int& width, int& height) const
 #pragma endregion
 
 #pragma region Direct3D Resources
+//------------------------------------------------------------------------------
 // These are the resources that depend on the device.
+//------------------------------------------------------------------------------
 void
 Game::CreateDeviceDependentResources()
 {
@@ -178,29 +203,33 @@ Game::CreateDeviceDependentResources()
 	m_teapotMesh->CreateInputLayout(m_basicEffect.get(), &m_inputLayout);
 }
 
+//------------------------------------------------------------------------------
 // Allocate all memory resources that change on a window SizeChanged event.
+//------------------------------------------------------------------------------
 void
 Game::CreateWindowSizeDependentResources()
 {
 	const float fovAngleY = 70.0f * XM_PI / 180.0f;
-	RECT outputSize		= m_deviceResources->GetOutputSize();
-	float aspectRatio = float(outputSize.right - outputSize.left)
+	RECT outputSize				= m_deviceResources->GetOutputSize();
+	float aspectRatio			= float(outputSize.right - outputSize.left)
 											/ (outputSize.bottom - outputSize.top);
-	
+
 	m_model = Matrix::Identity;
-	m_view = Matrix::Identity;
-	m_proj = Matrix::CreatePerspectiveFieldOfView(
-		fovAngleY, aspectRatio, 0.01f, 100.f);
+	m_view	= Matrix::Identity;
+	m_proj	= Matrix::CreatePerspectiveFieldOfView(
+		 fovAngleY, aspectRatio, 0.01f, 100.f);
 
 	m_basicEffect->SetProjection(m_proj);
 }
 
+//------------------------------------------------------------------------------
 void
 Game::OnDeviceLost()
 {
 	m_inputLayout.Reset();
 }
 
+//------------------------------------------------------------------------------
 void
 Game::OnDeviceRestored()
 {
@@ -209,3 +238,5 @@ Game::OnDeviceRestored()
 	CreateWindowSizeDependentResources();
 }
 #pragma endregion
+
+//------------------------------------------------------------------------------

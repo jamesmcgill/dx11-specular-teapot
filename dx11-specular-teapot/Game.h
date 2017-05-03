@@ -56,4 +56,5 @@ private:
 	DirectX::SimpleMath::Matrix m_model;
 	DirectX::SimpleMath::Matrix m_view;
 	DirectX::SimpleMath::Matrix m_proj;
+	float m_rotationRadiansPS;
 };
