@@ -87,16 +87,16 @@ Game::Render()
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
 	// Setup Camera
-	static const Vector4 eye = {0.0f, 0.7f, 1.5f, 0.0f};
+	static const Vector4 eye = {0.0f, 0.7f, 1.2f, 0.0f};
 	static const Vector4 at	= {0.0f, -0.1f, 0.0f, 0.0f};
 	static const Vector4 up	= {0.0f, 1.0f, 0.0f, 0.0f};
 
 	m_view = XMMatrixLookAtRH(eye, at, up);
-	m_basicEffect->SetView(m_view);
+	m_myEffect->SetView(m_view);
 
-	m_basicEffect->SetWorld(m_model);
+	m_myEffect->SetWorld(m_model);
 
-	m_teapotMesh->Draw(m_basicEffect.get(), m_inputLayout.Get());
+	m_teapotMesh->Draw(m_myEffect.get(), m_inputLayout.Get());
 
 	m_deviceResources->PIXEndEvent();
 
@@ -194,13 +194,18 @@ Game::CreateDeviceDependentResources()
 {
 	auto device = m_deviceResources->GetD3DDevice();
 
-	m_basicEffect
-		= std::make_unique<BasicEffect>(m_deviceResources->GetD3DDevice());
+	m_myEffectFactory
+		= std::make_unique<MyEffectFactory>(device);
+
+	IEffectFactory::EffectInfo info;
+	m_myEffect
+		= std::static_pointer_cast<MyEffect>(m_myEffectFactory->CreateEffect(
+			info, m_deviceResources->GetD3DDeviceContext()));
 
 	m_teapotMesh = GeometricPrimitive::CreateTeapot(
 		m_deviceResources->GetD3DDeviceContext());
 
-	m_teapotMesh->CreateInputLayout(m_basicEffect.get(), &m_inputLayout);
+	m_teapotMesh->CreateInputLayout(m_myEffect.get(), &m_inputLayout);
 }
 
 //------------------------------------------------------------------------------
@@ -219,7 +224,7 @@ Game::CreateWindowSizeDependentResources()
 	m_proj	= Matrix::CreatePerspectiveFieldOfView(
 		 fovAngleY, aspectRatio, 0.01f, 100.f);
 
-	m_basicEffect->SetProjection(m_proj);
+	m_myEffect->SetProjection(m_proj);
 }
 
 //------------------------------------------------------------------------------
