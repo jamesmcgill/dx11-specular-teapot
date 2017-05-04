@@ -28,6 +28,7 @@
       <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="ReadData.h" />
+    <ClInclude Include="Grid.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -42,6 +43,7 @@
     <ClCompile Include="Shader\MyEffectFactory.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Grid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

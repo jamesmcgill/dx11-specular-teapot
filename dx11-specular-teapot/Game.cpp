@@ -65,7 +65,7 @@ Game::Update(DX::StepTimer const& timer)
 	double totalRotation = totalTimeS * m_rotationRadiansPS;
 	float radians				 = static_cast<float>(fmod(totalRotation, XM_2PI));
 
-	m_model = XMMatrixRotationY(radians);
+	m_modelWorld = XMMatrixRotationY(radians);
 }
 #pragma endregion
 
@@ -94,8 +94,9 @@ Game::Render()
 	m_view = XMMatrixLookAtRH(eye, at, up);
 	m_myEffect->SetView(m_view);
 
-	m_myEffect->SetWorld(m_model);
+	m_myEffect->SetWorld(m_modelWorld);
 
+	m_grid->Render(m_gridWorld, m_view, m_proj, context);
 	m_teapotMesh->Draw(m_myEffect.get(), m_inputLayout.Get());
 
 	m_deviceResources->PIXEndEvent();
@@ -192,20 +193,20 @@ Game::GetDefaultSize(int& width, int& height) const
 void
 Game::CreateDeviceDependentResources()
 {
-	auto device = m_deviceResources->GetD3DDevice();
+	auto device	= m_deviceResources->GetD3DDevice();
+	auto context = m_deviceResources->GetD3DDeviceContext();
 
-	m_myEffectFactory
-		= std::make_unique<MyEffectFactory>(device);
+	m_myEffectFactory = std::make_unique<MyEffectFactory>(device);
 
 	IEffectFactory::EffectInfo info;
-	m_myEffect
-		= std::static_pointer_cast<MyEffect>(m_myEffectFactory->CreateEffect(
-			info, m_deviceResources->GetD3DDeviceContext()));
+	m_myEffect = std::static_pointer_cast<MyEffect>(
+		m_myEffectFactory->CreateEffect(info, context));
 
-	m_teapotMesh = GeometricPrimitive::CreateTeapot(
-		m_deviceResources->GetD3DDeviceContext());
+	m_teapotMesh = GeometricPrimitive::CreateTeapot(context);
 
 	m_teapotMesh->CreateInputLayout(m_myEffect.get(), &m_inputLayout);
+
+	m_grid = std::make_unique<Grid>(device, context);
 }
 
 //------------------------------------------------------------------------------
@@ -219,10 +220,11 @@ Game::CreateWindowSizeDependentResources()
 	float aspectRatio			= float(outputSize.right - outputSize.left)
 											/ (outputSize.bottom - outputSize.top);
 
-	m_model = Matrix::Identity;
-	m_view	= Matrix::Identity;
-	m_proj	= Matrix::CreatePerspectiveFieldOfView(
-		 fovAngleY, aspectRatio, 0.01f, 100.f);
+	m_gridWorld	= XMMatrixTranslation(0.0f, -0.3f, 0.0f);
+	m_modelWorld = Matrix::Identity;
+	m_view			 = Matrix::Identity;
+	m_proj			 = Matrix::CreatePerspectiveFieldOfView(
+		fovAngleY, aspectRatio, 0.01f, 100.f);
 
 	m_myEffect->SetProjection(m_proj);
 }
