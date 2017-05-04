@@ -35,8 +35,10 @@ public:
 
 private:
 	void Update(DX::StepTimer const& timer);
-	void Render();
+	void HandleInput(DX::StepTimer const& timer);
 
+	void Render();
+	void PositionCamera();
 	void Clear();
 
 	void CreateDeviceDependentResources();
@@ -44,6 +46,7 @@ private:
 
 	// Device resources.
 	std::unique_ptr<DX::DeviceResources> m_deviceResources;
+	std::unique_ptr<DirectX::Keyboard> m_keyboard;
 
 	// Rendering loop timer.
 	DX::StepTimer m_timer;
@@ -59,5 +62,7 @@ private:
 	DirectX::SimpleMath::Matrix m_modelWorld;
 	DirectX::SimpleMath::Matrix m_view;
 	DirectX::SimpleMath::Matrix m_proj;
-	float m_rotationRadiansPS;
+	float m_rotationRadiansPS = 0.0f;
+	float m_cameraRotationX = 0.0f;
+	float m_cameraRotationY = 0.0f;
 };

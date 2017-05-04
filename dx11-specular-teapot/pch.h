@@ -45,6 +45,7 @@
 #include "PrimitiveBatch.h"
 #include "VertexTypes.h"
 #include "SimpleMath.h"
+#include "Keyboard.h"
 
 #include <algorithm>
 #include <exception>

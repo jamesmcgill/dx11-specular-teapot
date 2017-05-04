@@ -10,10 +10,13 @@ using Microsoft::WRL::ComPtr;
 
 //------------------------------------------------------------------------------
 constexpr float ROTATION_DEGREES_PER_SECOND = 45.f;
+constexpr float CAMERA_SPEED_X = 1.0f;
+constexpr float CAMERA_SPEED_Y = 1.0f;
 
 //------------------------------------------------------------------------------
 Game::Game()
-		: m_rotationRadiansPS(XMConvertToRadians(ROTATION_DEGREES_PER_SECOND))
+		: m_keyboard(std::make_unique<Keyboard>())
+		, m_rotationRadiansPS(XMConvertToRadians(ROTATION_DEGREES_PER_SECOND))
 {
 	m_deviceResources = std::make_unique<DX::DeviceResources>();
 	m_deviceResources->RegisterDeviceNotify(this);
@@ -60,12 +63,40 @@ Game::Tick()
 void
 Game::Update(DX::StepTimer const& timer)
 {
-	float totalTimeS = float(timer.GetTotalSeconds());
+	HandleInput(timer);
 
+	float totalTimeS = static_cast<float>(timer.GetTotalSeconds());
+	
+	// Implicit Model Rotation
 	double totalRotation = totalTimeS * m_rotationRadiansPS;
 	float radians				 = static_cast<float>(fmod(totalRotation, XM_2PI));
-
 	m_modelWorld = XMMatrixRotationY(radians);
+}
+
+//------------------------------------------------------------------------------
+void
+Game::HandleInput(DX::StepTimer const& timer) {
+	float elapsedTimeS = static_cast<float>(timer.GetElapsedSeconds());
+
+	// Handle Keyboard Input
+	auto kbState = m_keyboard->GetState();
+	if (kbState.Escape) {
+		ExitGame();
+	}
+
+	if (kbState.Up) {
+		m_cameraRotationX -= elapsedTimeS * CAMERA_SPEED_X;
+	}
+	else if (kbState.Down) {
+		m_cameraRotationX += elapsedTimeS * CAMERA_SPEED_X;
+	}
+
+	if (kbState.Left) {
+		m_cameraRotationY -= elapsedTimeS * CAMERA_SPEED_Y;
+	}
+	else if (kbState.Right) {
+		m_cameraRotationY += elapsedTimeS * CAMERA_SPEED_Y;
+	}
 }
 #pragma endregion
 
@@ -86,12 +117,7 @@ Game::Render()
 	m_deviceResources->PIXBeginEvent(L"Render");
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
-	// Setup Camera
-	static const Vector4 eye = {0.0f, 0.7f, 1.2f, 0.0f};
-	static const Vector4 at	= {0.0f, -0.1f, 0.0f, 0.0f};
-	static const Vector4 up	= {0.0f, 1.0f, 0.0f, 0.0f};
-
-	m_view = XMMatrixLookAtRH(eye, at, up);
+	PositionCamera();
 	m_myEffect->SetView(m_view);
 
 	m_myEffect->SetWorld(m_modelWorld);
@@ -103,6 +129,30 @@ Game::Render()
 
 	// Show the new frame.
 	m_deviceResources->Present();
+}
+
+//------------------------------------------------------------------------------
+void
+Game::PositionCamera() {
+	static const Vector4 eye = { 0.0f, 0.7f, 1.2f, 0.0f };
+	static const Vector4 at = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const Vector4 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+	XMVECTOR eyePos = ::XMVectorSubtract(eye, at);
+
+	float radiansX
+		= static_cast<float>(fmod(m_cameraRotationX, XM_2PI));
+	eyePos = ::XMVector3Rotate(
+		eyePos, XMQuaternionRotationMatrix(XMMatrixRotationX(radiansX)));
+
+	float radiansY
+		= static_cast<float>(fmod(m_cameraRotationY, XM_2PI));
+	eyePos = ::XMVector3Rotate(
+		eyePos, XMQuaternionRotationMatrix(XMMatrixRotationY(radiansY)));
+
+	eyePos = ::XMVectorAdd(eyePos, at);
+
+	m_view = XMMatrixLookAtRH(eyePos, at, up);
 }
 
 //------------------------------------------------------------------------------
