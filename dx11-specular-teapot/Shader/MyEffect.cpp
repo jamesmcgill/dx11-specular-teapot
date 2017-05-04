@@ -6,10 +6,11 @@ using namespace DirectX;
 //------------------------------------------------------------------------------
 struct StaticConstantBuffer
 {
-	DirectX::XMFLOAT4 vColor;
-	DirectX::XMFLOAT4 vLightDir;
-	DirectX::XMFLOAT4 vDIC;
-	DirectX::XMFLOAT4 vSpecIC;
+	DirectX::XMFLOAT4 modelColor;
+	DirectX::XMFLOAT4 ambientIC;
+	DirectX::XMFLOAT4 diffuseIC;
+	DirectX::XMFLOAT4 specularIC;
+	DirectX::XMFLOAT4 lightDir;
 };
 
 //------------------------------------------------------------------------------
@@ -80,15 +81,17 @@ MyEffect::Impl::Impl(_In_ ID3D11Device* device)
 		&dynamicBufferDesc, nullptr, &m_dynamicConstantBuffer));
 
 	// Populate Static Data
-	static const XMVECTORF32 vColor		 = {1.0f, 1.0f, 1.0f, 1.0f};
-	static const XMVECTORF32 vLightDir = {0.0f, 1.0f, 0.5f, 1.0f};
-	static const XMVECTORF32 vDIC			 = {1.0f, 1.0f, 1.0f, 1.0f};
-	static const XMVECTORF32 vSpecIC	 = {1.0f, 1.0f, 1.0f, 1.0f};
+	static const XMVECTORF32 modelColor	= {1.0f,  0.0f,  0.0f,  1.0f};
+	static const XMVECTORF32 ambientIC	= {0.3f,  0.27f, 0.24f, 1.0f};
+	static const XMVECTORF32 diffuseIC	= {0.7f,  0.7f,  0.7f,  1.0f};
+	static const XMVECTORF32 specularIC	= {1.0f,  1.0f,  1.0f,  1.0f};
+	static const XMVECTORF32 lightDir		= {0.6f,  0.0f, -1.0f,  0.0f};
 
-	XMStoreFloat4(&m_staticData.vColor, vColor);
-	XMStoreFloat4(&m_staticData.vLightDir, vLightDir);
-	XMStoreFloat4(&m_staticData.vDIC, vDIC);
-	XMStoreFloat4(&m_staticData.vSpecIC, vSpecIC);
+	XMStoreFloat4(&m_staticData.modelColor, modelColor);
+	XMStoreFloat4(&m_staticData.ambientIC, ambientIC);
+	XMStoreFloat4(&m_staticData.diffuseIC, diffuseIC);
+	XMStoreFloat4(&m_staticData.specularIC, specularIC);
+	XMStoreFloat4(&m_staticData.lightDir, lightDir);
 }
 
 //------------------------------------------------------------------------------

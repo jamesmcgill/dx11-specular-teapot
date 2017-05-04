@@ -1,9 +1,10 @@
 cbuffer StaticBuffer : register(b0)
 {
-	float4 color;
-	float4 vLightDir;
-	float4 vDIC;
-	float4 vSpecIC;
+	float4 modelColor;
+	float4 ambientIC;
+	float4 diffuseIC;
+	float4 specularIC;
+	float4 lightDir;
 };
 
 //------------------------------------------------------------------------------
@@ -13,7 +14,7 @@ cbuffer DynamicBuffer : register(b1)
 	matrix view;
 	matrix projection;
 	matrix worldInverseTranspose;
-	float4 vecEye;
+	float4 eyePos;
 };
 
 //------------------------------------------------------------------------------
@@ -32,8 +33,6 @@ struct VertexShaderInput
 struct PixelShaderInput
 {
 	float4 pos : SV_POSITION;
-	float4 color : COLOR0;
-	float3 light : TEXCOORD1;
 	float3 normal : NORMAL;
 	float3 eyeRay: TEXCOORD2;
 };
@@ -53,14 +52,11 @@ PixelShaderInput main(VertexShaderInput input)
 	pos = mul(pos, projection);
 	output.pos = pos;
 
-	output.color = float4(1.0f, 1.0f, 1.0f, 1.0f);
-
 	// transform the normal
 	output.normal = mul(normal, model).xyz;
 
 	// for specular light
-	output.eyeRay = (vecEye - worldPos).xyz;
-	output.light = float3(1.0f, 0.0f, 0.0f);
+	output.eyeRay = (eyePos - worldPos).xyz;
 
 	return output;
 }
