@@ -3,6 +3,7 @@
 //
 
 #include "pch.h"
+#include "resource.h"
 #include "Game.h"
 
 using namespace DirectX;
@@ -48,12 +49,12 @@ wWinMain(
 		wcex.cbClsExtra		 = 0;
 		wcex.cbWndExtra		 = 0;
 		wcex.hInstance		 = hInstance;
-		wcex.hIcon				 = LoadIcon(hInstance, L"IDI_ICON");
+		wcex.hIcon				 = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1));
 		wcex.hCursor			 = LoadCursor(nullptr, IDC_ARROW);
 		wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 		wcex.lpszMenuName	= nullptr;
 		wcex.lpszClassName = L"dx11_specular_teapotWindowClass";
-		wcex.hIconSm			 = LoadIcon(wcex.hInstance, L"IDI_ICON");
+		wcex.hIconSm			 = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_ICON1));
 		if (!RegisterClassEx(&wcex)) return 1;
 
 		// Create window

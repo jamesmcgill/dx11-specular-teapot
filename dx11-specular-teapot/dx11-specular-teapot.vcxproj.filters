@@ -29,6 +29,7 @@
     </ClInclude>
     <ClInclude Include="ReadData.h" />
     <ClInclude Include="Grid.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -44,9 +45,6 @@
       <Filter>Shader</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="resource.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="directx.ico">
@@ -65,5 +63,8 @@
     <FxCompile Include="Shader\VertexShader.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="dx11-specular-teapot.rc" />
   </ItemGroup>
 </Project>
