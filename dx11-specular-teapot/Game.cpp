@@ -10,8 +10,8 @@ using Microsoft::WRL::ComPtr;
 
 //------------------------------------------------------------------------------
 constexpr float ROTATION_DEGREES_PER_SECOND = 45.f;
-constexpr float CAMERA_SPEED_X = 1.0f;
-constexpr float CAMERA_SPEED_Y = 1.0f;
+constexpr float CAMERA_SPEED_X							= 1.0f;
+constexpr float CAMERA_SPEED_Y							= 1.0f;
 
 //------------------------------------------------------------------------------
 Game::Game()
@@ -66,16 +66,17 @@ Game::Update(DX::StepTimer const& timer)
 	HandleInput(timer);
 
 	float totalTimeS = static_cast<float>(timer.GetTotalSeconds());
-	
+
 	// Implicit Model Rotation
 	double totalRotation = totalTimeS * m_rotationRadiansPS;
 	float radians				 = static_cast<float>(fmod(totalRotation, XM_2PI));
-	m_modelWorld = XMMatrixRotationY(radians);
+	m_modelWorld				 = XMMatrixRotationY(radians);
 }
 
 //------------------------------------------------------------------------------
 void
-Game::HandleInput(DX::StepTimer const& timer) {
+Game::HandleInput(DX::StepTimer const& timer)
+{
 	float elapsedTimeS = static_cast<float>(timer.GetElapsedSeconds());
 
 	// Handle Keyboard Input
@@ -87,14 +88,16 @@ Game::HandleInput(DX::StepTimer const& timer) {
 	if (kbState.Up) {
 		m_cameraRotationX -= elapsedTimeS * CAMERA_SPEED_X;
 	}
-	else if (kbState.Down) {
+	else if (kbState.Down)
+	{
 		m_cameraRotationX += elapsedTimeS * CAMERA_SPEED_X;
 	}
 
 	if (kbState.Left) {
 		m_cameraRotationY -= elapsedTimeS * CAMERA_SPEED_Y;
 	}
-	else if (kbState.Right) {
+	else if (kbState.Right)
+	{
 		m_cameraRotationY += elapsedTimeS * CAMERA_SPEED_Y;
 	}
 }
@@ -116,6 +119,7 @@ Game::Render()
 
 	m_deviceResources->PIXBeginEvent(L"Render");
 	auto context = m_deviceResources->GetD3DDeviceContext();
+	context->RSSetState(m_raster.Get());
 
 	PositionCamera();
 	m_myEffect->SetView(m_view);
@@ -133,21 +137,20 @@ Game::Render()
 
 //------------------------------------------------------------------------------
 void
-Game::PositionCamera() {
-	static const Vector4 eye = { 0.0f, 0.7f, 1.2f, 0.0f };
-	static const Vector4 at = { 0.0f, -0.1f, 0.0f, 0.0f };
-	static const Vector4 up = { 0.0f, 1.0f, 0.0f, 0.0f };
+Game::PositionCamera()
+{
+	static const Vector4 eye = {0.0f, 0.7f, 1.2f, 0.0f};
+	static const Vector4 at	= {0.0f, -0.1f, 0.0f, 0.0f};
+	static const Vector4 up	= {0.0f, 1.0f, 0.0f, 0.0f};
 
 	XMVECTOR eyePos = ::XMVectorSubtract(eye, at);
 
-	float radiansX
-		= static_cast<float>(fmod(m_cameraRotationX, XM_2PI));
-	eyePos = ::XMVector3Rotate(
+	float radiansX = static_cast<float>(fmod(m_cameraRotationX, XM_2PI));
+	eyePos				 = ::XMVector3Rotate(
 		eyePos, XMQuaternionRotationMatrix(XMMatrixRotationX(radiansX)));
 
-	float radiansY
-		= static_cast<float>(fmod(m_cameraRotationY, XM_2PI));
-	eyePos = ::XMVector3Rotate(
+	float radiansY = static_cast<float>(fmod(m_cameraRotationY, XM_2PI));
+	eyePos				 = ::XMVector3Rotate(
 		eyePos, XMQuaternionRotationMatrix(XMMatrixRotationY(radiansY)));
 
 	eyePos = ::XMVectorAdd(eyePos, at);
@@ -246,6 +249,21 @@ Game::CreateDeviceDependentResources()
 	auto device	= m_deviceResources->GetD3DDevice();
 	auto context = m_deviceResources->GetD3DDeviceContext();
 
+	CD3D11_RASTERIZER_DESC rastDesc(
+		D3D11_FILL_SOLID,
+		D3D11_CULL_NONE,
+		FALSE,
+		D3D11_DEFAULT_DEPTH_BIAS,
+		D3D11_DEFAULT_DEPTH_BIAS_CLAMP,
+		D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS,
+		TRUE,
+		FALSE,
+		TRUE,
+		TRUE);
+
+	DX::ThrowIfFailed(device->CreateRasterizerState(
+		&rastDesc, m_raster.ReleaseAndGetAddressOf()));
+
 	m_myEffectFactory = std::make_unique<MyEffectFactory>(device);
 
 	IEffectFactory::EffectInfo info;
@@ -284,6 +302,7 @@ void
 Game::OnDeviceLost()
 {
 	m_inputLayout.Reset();
+	m_raster.Reset();
 }
 
 //------------------------------------------------------------------------------

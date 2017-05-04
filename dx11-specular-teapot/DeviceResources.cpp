@@ -292,7 +292,7 @@ DX::DeviceResources::CreateWindowSizeDependentResources()
 			swapChainDesc.Format								= m_backBufferFormat;
 			swapChainDesc.BufferUsage						= DXGI_USAGE_RENDER_TARGET_OUTPUT;
 			swapChainDesc.BufferCount						= m_backBufferCount;
-			swapChainDesc.SampleDesc.Count			= 1;
+			swapChainDesc.SampleDesc.Count			= 4;
 			swapChainDesc.SampleDesc.Quality		= 0;
 			swapChainDesc.Scaling								= DXGI_SCALING_STRETCH;
 			swapChainDesc.SwapEffect						= DXGI_SWAP_EFFECT_DISCARD;
@@ -319,7 +319,7 @@ DX::DeviceResources::CreateWindowSizeDependentResources()
 			swapChainDesc.BufferDesc.Width		 = backBufferWidth;
 			swapChainDesc.BufferDesc.Height		 = backBufferHeight;
 			swapChainDesc.BufferDesc.Format		 = m_backBufferFormat;
-			swapChainDesc.SampleDesc.Count		 = 1;
+			swapChainDesc.SampleDesc.Count		 = 4;
 			swapChainDesc.SampleDesc.Quality	 = 0;
 			swapChainDesc.BufferUsage					 = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 			swapChainDesc.BufferCount					 = m_backBufferCount;
@@ -356,13 +356,17 @@ DX::DeviceResources::CreateWindowSizeDependentResources()
 			backBufferHeight,
 			1,		// This depth stencil view has only one texture.
 			1,		// Use a single mipmap level.
-			D3D11_BIND_DEPTH_STENCIL);
+			D3D11_BIND_DEPTH_STENCIL,
+			D3D11_USAGE_DEFAULT,
+			0,
+			4,
+			0);
 
 		DX::ThrowIfFailed(m_d3dDevice->CreateTexture2D(
 			&depthStencilDesc, nullptr, m_depthStencil.ReleaseAndGetAddressOf()));
 
 		CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(
-			D3D11_DSV_DIMENSION_TEXTURE2D);
+			D3D11_DSV_DIMENSION_TEXTURE2DMS);
 		DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(
 			m_depthStencil.Get(),
 			&depthStencilViewDesc,

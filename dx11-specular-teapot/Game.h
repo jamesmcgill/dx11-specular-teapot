@@ -47,6 +47,7 @@ private:
 	// Device resources.
 	std::unique_ptr<DX::DeviceResources> m_deviceResources;
 	std::unique_ptr<DirectX::Keyboard> m_keyboard;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_raster;
 
 	// Rendering loop timer.
 	DX::StepTimer m_timer;

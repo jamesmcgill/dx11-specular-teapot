@@ -20,7 +20,6 @@ private:
 	DirectX::BasicEffect m_effect;
 	DirectX::PrimitiveBatch<DirectX::VertexPositionColor> m_batch;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_raster;
 };
 
 //------------------------------------------------------------------------------

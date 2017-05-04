@@ -3,6 +3,7 @@
 
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
+using Microsoft::WRL::ComPtr;
 //------------------------------------------------------------------------------
 Grid::Grid(ID3D11Device* _device, ID3D11DeviceContext* _deviceContext)
 		: m_states(_device)
@@ -21,28 +22,12 @@ Grid::Grid(ID3D11Device* _device, ID3D11DeviceContext* _deviceContext)
 		shaderByteCode,
 		byteCodeLength,
 		m_inputLayout.ReleaseAndGetAddressOf()));
-
-	CD3D11_RASTERIZER_DESC rastDesc(
-		D3D11_FILL_SOLID,
-		D3D11_CULL_NONE,
-		FALSE,
-		D3D11_DEFAULT_DEPTH_BIAS,
-		D3D11_DEFAULT_DEPTH_BIAS_CLAMP,
-		D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS,
-		TRUE,
-		FALSE,
-		FALSE,
-		TRUE);
-
-	DX::ThrowIfFailed(_device->CreateRasterizerState(
-		&rastDesc, m_raster.ReleaseAndGetAddressOf()));
 }
 
 //------------------------------------------------------------------------------
 void
 Grid::Reset()
 {
-	m_raster.Reset();
 }
 
 //------------------------------------------------------------------------------
@@ -53,9 +38,19 @@ Grid::Render(
 	DirectX::CXMMATRIX _projection,
 	ID3D11DeviceContext* _deviceContext)
 {
+	ComPtr<ID3D11BlendState> pPrevBlendState;
+	FLOAT prevBlendFactor[4];
+	UINT pPrevSampleMask;
+	ComPtr<ID3D11DepthStencilState> pDepthStencilState;
+	UINT pStencilRef;
+
+	_deviceContext->OMGetBlendState(
+		pPrevBlendState.GetAddressOf(), prevBlendFactor, &pPrevSampleMask);
+	_deviceContext->OMGetDepthStencilState(
+		pDepthStencilState.GetAddressOf(), &pStencilRef);
+
 	_deviceContext->OMSetBlendState(m_states.Opaque(), nullptr, 0xFFFFFFFF);
 	_deviceContext->OMSetDepthStencilState(m_states.DepthNone(), 0);
-	_deviceContext->RSSetState(m_raster.Get());
 
 	m_effect.SetMatrices(_world, _view, _projection);
 	m_effect.Apply(_deviceContext);
@@ -94,6 +89,10 @@ Grid::Render(
 	}
 
 	m_batch.End();
+
+	_deviceContext->OMSetBlendState(
+		pPrevBlendState.Get(), prevBlendFactor, pPrevSampleMask);
+	_deviceContext->OMSetDepthStencilState(pDepthStencilState.Get(), pStencilRef);
 }
 
 //------------------------------------------------------------------------------
