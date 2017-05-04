@@ -12,6 +12,7 @@ using Microsoft::WRL::ComPtr;
 constexpr float ROTATION_DEGREES_PER_SECOND = 45.f;
 constexpr float CAMERA_SPEED_X							= 1.0f;
 constexpr float CAMERA_SPEED_Y							= 1.0f;
+constexpr wchar_t* HUD_TEXT									= L"Arrow Keys: rotate camera";
 
 //------------------------------------------------------------------------------
 Game::Game()
@@ -129,6 +130,8 @@ Game::Render()
 	m_grid->Render(m_gridWorld, m_view, m_proj, context);
 	m_teapotMesh->Draw(m_myEffect.get(), m_inputLayout.Get());
 
+	DrawHUD();
+
 	m_deviceResources->PIXEndEvent();
 
 	// Show the new frame.
@@ -156,6 +159,23 @@ Game::PositionCamera()
 	eyePos = ::XMVectorAdd(eyePos, at);
 
 	m_view = XMMatrixLookAtRH(eyePos, at, up);
+}
+
+//------------------------------------------------------------------------------
+void
+Game::DrawHUD()
+{
+	m_fontSpriteBatch->Begin();
+
+	m_font->DrawString(
+		m_fontSpriteBatch.get(),
+		HUD_TEXT,
+		m_fontPos,
+		Colors::Yellow,
+		0.f,
+		m_fontOrigin);
+
+	m_fontSpriteBatch->End();
 }
 
 //------------------------------------------------------------------------------
@@ -264,6 +284,8 @@ Game::CreateDeviceDependentResources()
 	DX::ThrowIfFailed(device->CreateRasterizerState(
 		&rastDesc, m_raster.ReleaseAndGetAddressOf()));
 
+	m_font = std::make_unique<SpriteFont>(device, L"assets/verdana.spritefont");
+
 	m_myEffectFactory = std::make_unique<MyEffectFactory>(device);
 
 	IEffectFactory::EffectInfo info;
@@ -275,6 +297,8 @@ Game::CreateDeviceDependentResources()
 	m_teapotMesh->CreateInputLayout(m_myEffect.get(), &m_inputLayout);
 
 	m_grid = std::make_unique<Grid>(device, context);
+
+	m_fontSpriteBatch = std::make_unique<SpriteBatch>(context);
 }
 
 //------------------------------------------------------------------------------
@@ -295,13 +319,27 @@ Game::CreateWindowSizeDependentResources()
 		fovAngleY, aspectRatio, 0.01f, 100.f);
 
 	m_myEffect->SetProjection(m_proj);
+
+	// Position HUD
+	XMVECTOR dimensions = m_font->MeasureString(HUD_TEXT);
+	auto size						= m_deviceResources->GetOutputSize();
+	m_fontOrigin.x			= (XMVectorGetX(dimensions) / 2.f);
+	m_fontOrigin.y			= 0.f;
+	m_fontPos.x					= size.right / 2.f;
+	m_fontPos.y					= size.top;
 }
 
 //------------------------------------------------------------------------------
 void
 Game::OnDeviceLost()
 {
+	m_fontSpriteBatch.reset();
+	m_grid.reset();
+	m_teapotMesh.reset();
 	m_inputLayout.Reset();
+	m_myEffect.reset();
+	m_myEffectFactory.reset();
+	m_font.reset();
 	m_raster.Reset();
 }
 

@@ -39,6 +39,7 @@ private:
 
 	void Render();
 	void PositionCamera();
+	void DrawHUD();
 	void Clear();
 
 	void CreateDeviceDependentResources();
@@ -48,6 +49,7 @@ private:
 	std::unique_ptr<DX::DeviceResources> m_deviceResources;
 	std::unique_ptr<DirectX::Keyboard> m_keyboard;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_raster;
+	std::unique_ptr<DirectX::SpriteFont> m_font;
 
 	// Rendering loop timer.
 	DX::StepTimer m_timer;
@@ -58,6 +60,10 @@ private:
 	std::unique_ptr<MyEffectFactory> m_myEffectFactory;
 	std::shared_ptr<MyEffect> m_myEffect;
 	std::unique_ptr<Grid> m_grid;
+
+	DirectX::SimpleMath::Vector2 m_fontPos;
+	DirectX::SimpleMath::Vector2 m_fontOrigin;
+	std::unique_ptr<DirectX::SpriteBatch> m_fontSpriteBatch;
 
 	DirectX::SimpleMath::Matrix m_gridWorld;
 	DirectX::SimpleMath::Matrix m_modelWorld;

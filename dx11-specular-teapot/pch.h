@@ -46,6 +46,7 @@
 #include "VertexTypes.h"
 #include "SimpleMath.h"
 #include "Keyboard.h"
+#include "SpriteFont.h"
 
 #include <algorithm>
 #include <exception>

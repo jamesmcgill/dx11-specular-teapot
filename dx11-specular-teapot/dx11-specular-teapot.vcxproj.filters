@@ -67,4 +67,9 @@
   <ItemGroup>
     <ResourceCompile Include="dx11-specular-teapot.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\verdana.spritefont">
+      <Filter>Assets</Filter>
+    </None>
+  </ItemGroup>
 </Project>
