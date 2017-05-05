@@ -326,7 +326,7 @@ Game::CreateWindowSizeDependentResources()
 	m_fontOrigin.x			= (XMVectorGetX(dimensions) / 2.f);
 	m_fontOrigin.y			= 0.f;
 	m_fontPos.x					= size.right / 2.f;
-	m_fontPos.y					= size.top;
+	m_fontPos.y					= static_cast<float>(size.top);
 }
 
 //------------------------------------------------------------------------------

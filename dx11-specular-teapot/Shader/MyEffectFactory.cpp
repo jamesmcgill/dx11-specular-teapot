@@ -47,6 +47,10 @@ MyEffectFactory::Impl::CreateEffect(
 	const IEffectFactory::EffectInfo& info,
 	ID3D11DeviceContext* deviceContext)
 {
+	UNREFERENCED_PARAMETER(factory);
+	UNREFERENCED_PARAMETER(info);
+	UNREFERENCED_PARAMETER(deviceContext);
+
 	return m_effect;
 }
 
@@ -123,24 +127,28 @@ MyEffectFactory::ReleaseCache()
 void
 MyEffectFactory::SetSharing(bool enabled)
 {
+	UNREFERENCED_PARAMETER(enabled);
 }
 
 //------------------------------------------------------------------------------
 void
 MyEffectFactory::EnableNormalMapEffect(bool enabled)
 {
+	UNREFERENCED_PARAMETER(enabled);
 }
 
 //------------------------------------------------------------------------------
 void
 MyEffectFactory::EnableForceSRGB(bool forceSRGB)
 {
+	UNREFERENCED_PARAMETER(forceSRGB);
 }
 
 //------------------------------------------------------------------------------
 void
 MyEffectFactory::SetDirectory(_In_opt_z_ const wchar_t* path)
 {
+	UNREFERENCED_PARAMETER(path);
 }
 
 //------------------------------------------------------------------------------
