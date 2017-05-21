@@ -6,4 +6,4 @@ Replaces the DirectXTK standard effect types with a version that allows for writ
 
 After cloning ensure the submodules are available with `git submodule update --init`
 
-(Tested build using VS 2017 Community Edition on Windows 10)
+(Tested build using VS 2017 Community Edition on Windows 10 using toolset v141 and Windows SDK 10.0.14393.0)
