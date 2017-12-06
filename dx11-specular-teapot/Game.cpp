@@ -12,7 +12,7 @@ using Microsoft::WRL::ComPtr;
 constexpr float ROTATION_DEGREES_PER_SECOND = 45.f;
 constexpr float CAMERA_SPEED_X							= 1.0f;
 constexpr float CAMERA_SPEED_Y							= 1.0f;
-constexpr wchar_t* HUD_TEXT									= L"Arrow Keys: rotate camera";
+constexpr wchar_t HUD_TEXT[]								= L"Arrow Keys: rotate camera";
 
 //------------------------------------------------------------------------------
 Game::Game()
