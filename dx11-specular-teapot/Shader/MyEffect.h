@@ -16,6 +16,8 @@ public:
 
 	~MyEffect();
 
+	bool isInit() const;
+
 	// IEffect
 	void __cdecl Apply(_In_ ID3D11DeviceContext* deviceContext) override;
 	void __cdecl GetVertexShaderBytecode(

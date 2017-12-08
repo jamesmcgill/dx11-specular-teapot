@@ -30,6 +30,7 @@ public:
 	XMMATRIX m_world;
 	XMMATRIX m_view;
 	XMMATRIX m_projection;
+	bool m_isInit = false;
 
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
@@ -45,7 +46,7 @@ public:
 	void GetVertexShaderBytecode(
 		_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength);
 
-	void loadShaders(ID3D11Device* device);
+	HRESULT loadShaders(ID3D11Device* device);
 
 	// Allocate aligned memory. (Required as we are storing raw XMMATRIX types.
 	static void* operator new(size_t size)
@@ -67,37 +68,54 @@ public:
 //------------------------------------------------------------------------------
 MyEffect::Impl::Impl(_In_ ID3D11Device* device)
 {
-	loadShaders(device);
-
-	// Create Buffers
-	CD3D11_BUFFER_DESC staticBufferDesc(
-		sizeof(StaticConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-	DX::ThrowIfFailed(
-		device->CreateBuffer(&staticBufferDesc, nullptr, &m_staticConstantBuffer));
-
-	CD3D11_BUFFER_DESC dynamicBufferDesc(
-		sizeof(DynamicConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-	DX::ThrowIfFailed(device->CreateBuffer(
-		&dynamicBufferDesc, nullptr, &m_dynamicConstantBuffer));
+	m_isInit = false;
 
 	// Populate Static Data
-	static const XMVECTORF32 modelColor	= {1.0f,  0.0f,  0.0f,  1.0f};
-	static const XMVECTORF32 ambientIC	= {0.3f,  0.27f, 0.24f, 1.0f};
-	static const XMVECTORF32 diffuseIC	= {0.7f,  0.7f,  0.7f,  1.0f};
-	static const XMVECTORF32 specularIC	= {1.0f,  1.0f,  1.0f,  1.0f};
-	static const XMVECTORF32 lightDir		= {0.6f,  0.0f, -1.0f,  0.0f};
+	static const XMVECTORF32 modelColor = {1.0f, 0.0f, 0.0f, 1.0f};
+	static const XMVECTORF32 ambientIC	= {0.3f, 0.27f, 0.24f, 1.0f};
+	static const XMVECTORF32 diffuseIC	= {0.7f, 0.7f, 0.7f, 1.0f};
+	static const XMVECTORF32 specularIC = {1.0f, 1.0f, 1.0f, 1.0f};
+	static const XMVECTORF32 lightDir		= {0.6f, 0.0f, -1.0f, 0.0f};
 
 	XMStoreFloat4(&m_staticData.modelColor, modelColor);
 	XMStoreFloat4(&m_staticData.ambientIC, ambientIC);
 	XMStoreFloat4(&m_staticData.diffuseIC, diffuseIC);
 	XMStoreFloat4(&m_staticData.specularIC, specularIC);
 	XMStoreFloat4(&m_staticData.lightDir, lightDir);
+
+	if (FAILED(loadShaders(device))) {
+		return;
+	}
+
+	// Create Buffers
+	CD3D11_BUFFER_DESC staticBufferDesc(
+		sizeof(StaticConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+	if (FAILED(device->CreateBuffer(
+				&staticBufferDesc, nullptr, &m_staticConstantBuffer)))
+	{
+		return;
+	}
+
+	CD3D11_BUFFER_DESC dynamicBufferDesc(
+		sizeof(DynamicConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
+
+	if (FAILED(device->CreateBuffer(
+				&dynamicBufferDesc, nullptr, &m_dynamicConstantBuffer)))
+	{
+		return;
+	}
+
+	m_isInit = true;
 }
 
 //------------------------------------------------------------------------------
 void
 MyEffect::Impl::Apply(_In_ ID3D11DeviceContext* deviceContext)
 {
+	if (!m_isInit) {
+		return;
+	}
+
 	// Update the static buffer
 	deviceContext->UpdateSubresource(
 		m_staticConstantBuffer.Get(), 0, NULL, &m_staticData, 0, 0);
@@ -137,27 +155,35 @@ void
 MyEffect::Impl::GetVertexShaderBytecode(
 	_Out_ void const** pShaderByteCode, _Out_ size_t* pByteCodeLength)
 {
-	*pShaderByteCode = &m_VSBytecode[0];
+	*pShaderByteCode = m_VSBytecode.empty() ? nullptr : &m_VSBytecode[0];
 	*pByteCodeLength = m_VSBytecode.size();
 }
 
 //------------------------------------------------------------------------------
-void
+HRESULT
 MyEffect::Impl::loadShaders(ID3D11Device* device)
 {
-	m_VSBytecode = DX::ReadData(L"VertexShader.cso");
-	DX::ThrowIfFailed(device->CreateVertexShader(
-		m_VSBytecode.data(),
-		m_VSBytecode.size(),
-		nullptr,
-		m_vertexShader.ReleaseAndGetAddressOf()));
+	try
+	{
+		m_VSBytecode = DX::ReadData(L"VertexShader.cso");
+		DX::ThrowIfFailed(device->CreateVertexShader(
+			m_VSBytecode.data(),
+			m_VSBytecode.size(),
+			nullptr,
+			m_vertexShader.ReleaseAndGetAddressOf()));
 
-	auto psData = DX::ReadData(L"PixelShader.cso");
-	DX::ThrowIfFailed(device->CreatePixelShader(
-		psData.data(),
-		psData.size(),
-		nullptr,
-		m_pixelShader.ReleaseAndGetAddressOf()));
+		auto psData = DX::ReadData(L"PixelShader.cso");
+		DX::ThrowIfFailed(device->CreatePixelShader(
+			psData.data(),
+			psData.size(),
+			nullptr,
+			m_pixelShader.ReleaseAndGetAddressOf()));
+	}
+	catch (...)
+	{
+		return E_FAIL;
+	}
+	return S_OK;
 }
 
 //------------------------------------------------------------------------------
@@ -169,9 +195,7 @@ MyEffect::MyEffect(_In_ ID3D11Device* device)
 }
 
 //------------------------------------------------------------------------------
-MyEffect::~MyEffect()
-{
-}
+MyEffect::~MyEffect() {}
 
 //------------------------------------------------------------------------------
 MyEffect::MyEffect(MyEffect&& moveFrom)
@@ -185,6 +209,13 @@ MyEffect::operator=(MyEffect&& moveFrom)
 {
 	m_pImpl = std::move(moveFrom.m_pImpl);
 	return *this;
+}
+
+//------------------------------------------------------------------------------
+bool
+MyEffect::isInit() const
+{
+	return m_pImpl->m_isInit;
 }
 
 //------------------------------------------------------------------------------

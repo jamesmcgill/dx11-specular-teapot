@@ -42,8 +42,8 @@ private:
 	void DrawHUD();
 	void Clear();
 
-	void CreateDeviceDependentResources();
-	void CreateWindowSizeDependentResources();
+	HRESULT CreateDeviceDependentResources();
+	HRESULT CreateWindowSizeDependentResources();
 
 	// Device resources.
 	std::unique_ptr<DX::DeviceResources> m_deviceResources;
@@ -70,6 +70,6 @@ private:
 	DirectX::SimpleMath::Matrix m_view;
 	DirectX::SimpleMath::Matrix m_proj;
 	float m_rotationRadiansPS = 0.0f;
-	float m_cameraRotationX = 0.0f;
-	float m_cameraRotationY = 0.0f;
+	float m_cameraRotationX		= 0.0f;
+	float m_cameraRotationY		= 0.0f;
 };

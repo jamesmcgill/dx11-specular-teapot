@@ -33,9 +33,17 @@ Game::Initialize(HWND window, int width, int height)
 
 	m_deviceResources->CreateDeviceResources();
 	CreateDeviceDependentResources();
+	if (FAILED(CreateDeviceDependentResources())) {
+		ExitGame();
+		return;
+	}
 
 	m_deviceResources->CreateWindowSizeDependentResources();
-	CreateWindowSizeDependentResources();
+
+	if (FAILED(CreateWindowSizeDependentResources())) {
+		ExitGame();
+		return;
+	}
 
 	// TODO: Change the timer settings if you want something other than the
 	// default variable timestep mode. e.g. for 60 FPS fixed timestep update
@@ -263,7 +271,7 @@ Game::GetDefaultSize(int& width, int& height) const
 //------------------------------------------------------------------------------
 // These are the resources that depend on the device.
 //------------------------------------------------------------------------------
-void
+HRESULT
 Game::CreateDeviceDependentResources()
 {
 	auto device	= m_deviceResources->GetD3DDevice();
@@ -281,30 +289,42 @@ Game::CreateDeviceDependentResources()
 		TRUE,
 		TRUE);
 
-	DX::ThrowIfFailed(device->CreateRasterizerState(
-		&rastDesc, m_raster.ReleaseAndGetAddressOf()));
+	try
+	{
+		DX::ThrowIfFailed(device->CreateRasterizerState(
+			&rastDesc, m_raster.ReleaseAndGetAddressOf()));
 
-	m_font = std::make_unique<SpriteFont>(device, L"assets/verdana.spritefont");
+		m_font = std::make_unique<SpriteFont>(device, L"assets/verdana.spritefont");
 
-	m_myEffectFactory = std::make_unique<MyEffectFactory>(device);
+		m_myEffectFactory = std::make_unique<MyEffectFactory>(device);
 
-	IEffectFactory::EffectInfo info;
-	m_myEffect = std::static_pointer_cast<MyEffect>(
-		m_myEffectFactory->CreateEffect(info, context));
+		IEffectFactory::EffectInfo info;
+		m_myEffect = std::static_pointer_cast<MyEffect>(
+			m_myEffectFactory->CreateEffect(info, context));
 
-	m_teapotMesh = GeometricPrimitive::CreateTeapot(context);
+		if (!m_myEffect->isInit()) {
+			return E_FAIL;
+		}
 
-	m_teapotMesh->CreateInputLayout(m_myEffect.get(), &m_inputLayout);
+		m_teapotMesh = GeometricPrimitive::CreateTeapot(context);
+		m_teapotMesh->CreateInputLayout(m_myEffect.get(), &m_inputLayout);
 
-	m_grid = std::make_unique<Grid>(device, context);
+		m_grid = std::make_unique<Grid>(device, context);
 
-	m_fontSpriteBatch = std::make_unique<SpriteBatch>(context);
+		m_fontSpriteBatch = std::make_unique<SpriteBatch>(context);
+	}
+	catch (...)
+	{
+		return E_FAIL;
+	}
+
+	return S_OK;
 }
 
 //------------------------------------------------------------------------------
 // Allocate all memory resources that change on a window SizeChanged event.
 //------------------------------------------------------------------------------
-void
+HRESULT
 Game::CreateWindowSizeDependentResources()
 {
 	const float fovAngleY = 70.0f * XM_PI / 180.0f;
@@ -327,6 +347,8 @@ Game::CreateWindowSizeDependentResources()
 	m_fontOrigin.y			= 0.f;
 	m_fontPos.x					= size.right / 2.f;
 	m_fontPos.y					= static_cast<float>(size.top);
+
+	return S_OK;
 }
 
 //------------------------------------------------------------------------------
@@ -347,9 +369,16 @@ Game::OnDeviceLost()
 void
 Game::OnDeviceRestored()
 {
-	CreateDeviceDependentResources();
+	if (FAILED(CreateDeviceDependentResources())) {
+		ExitGame();
+		return;
+	}
 
 	CreateWindowSizeDependentResources();
+	if (FAILED(CreateWindowSizeDependentResources())) {
+		ExitGame();
+		return;
+	}
 }
 #pragma endregion
 
