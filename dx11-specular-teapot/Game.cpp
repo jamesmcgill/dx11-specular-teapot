@@ -32,7 +32,6 @@ Game::Initialize(HWND window, int width, int height)
 	m_deviceResources->SetWindow(window, width, height);
 
 	m_deviceResources->CreateDeviceResources();
-	CreateDeviceDependentResources();
 	if (FAILED(CreateDeviceDependentResources())) {
 		ExitGame();
 		return;
