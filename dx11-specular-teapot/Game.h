@@ -11,65 +11,65 @@
 class Game : public DX::IDeviceNotify
 {
 public:
-	Game();
+  Game();
 
-	// Initialization and management
-	void Initialize(HWND window, int width, int height);
+  // Initialization and management
+  void Initialize(HWND window, int width, int height);
 
-	// Basic game loop
-	void Tick();
+  // Basic game loop
+  void Tick();
 
-	// IDeviceNotify
-	virtual void OnDeviceLost() override;
-	virtual void OnDeviceRestored() override;
+  // IDeviceNotify
+  virtual void OnDeviceLost() override;
+  virtual void OnDeviceRestored() override;
 
-	// Messages
-	void OnActivated();
-	void OnDeactivated();
-	void OnSuspending();
-	void OnResuming();
-	void OnWindowSizeChanged(int width, int height);
+  // Messages
+  void OnActivated();
+  void OnDeactivated();
+  void OnSuspending();
+  void OnResuming();
+  void OnWindowSizeChanged(int width, int height);
 
-	// Properties
-	void GetDefaultSize(int& width, int& height) const;
+  // Properties
+  void GetDefaultSize(int& width, int& height) const;
 
 private:
-	void Update(DX::StepTimer const& timer);
-	void HandleInput(DX::StepTimer const& timer);
+  void Update(DX::StepTimer const& timer);
+  void HandleInput(DX::StepTimer const& timer);
 
-	void Render();
-	void PositionCamera();
-	void DrawHUD();
-	void Clear();
+  void Render();
+  void PositionCamera();
+  void DrawHUD();
+  void Clear();
 
-	HRESULT CreateDeviceDependentResources();
-	HRESULT CreateWindowSizeDependentResources();
+  HRESULT CreateDeviceDependentResources();
+  HRESULT CreateWindowSizeDependentResources();
 
-	// Device resources.
-	std::unique_ptr<DX::DeviceResources> m_deviceResources;
-	std::unique_ptr<DirectX::Keyboard> m_keyboard;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_raster;
-	std::unique_ptr<DirectX::SpriteFont> m_font;
+  // Device resources.
+  std::unique_ptr<DX::DeviceResources> m_deviceResources;
+  std::unique_ptr<DirectX::Keyboard> m_keyboard;
+  Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_raster;
+  std::unique_ptr<DirectX::SpriteFont> m_font;
 
-	// Rendering loop timer.
-	DX::StepTimer m_timer;
+  // Rendering loop timer.
+  DX::StepTimer m_timer;
 
-	// Visuals
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-	std::unique_ptr<DirectX::GeometricPrimitive> m_teapotMesh;
-	std::unique_ptr<MyEffectFactory> m_myEffectFactory;
-	std::shared_ptr<MyEffect> m_myEffect;
-	std::unique_ptr<Grid> m_grid;
+  // Visuals
+  Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
+  std::unique_ptr<DirectX::GeometricPrimitive> m_teapotMesh;
+  std::unique_ptr<MyEffectFactory> m_myEffectFactory;
+  std::shared_ptr<MyEffect> m_myEffect;
+  std::unique_ptr<Grid> m_grid;
 
-	DirectX::SimpleMath::Vector2 m_fontPos;
-	DirectX::SimpleMath::Vector2 m_fontOrigin;
-	std::unique_ptr<DirectX::SpriteBatch> m_fontSpriteBatch;
+  DirectX::SimpleMath::Vector2 m_fontPos;
+  DirectX::SimpleMath::Vector2 m_fontOrigin;
+  std::unique_ptr<DirectX::SpriteBatch> m_fontSpriteBatch;
 
-	DirectX::SimpleMath::Matrix m_gridWorld;
-	DirectX::SimpleMath::Matrix m_modelWorld;
-	DirectX::SimpleMath::Matrix m_view;
-	DirectX::SimpleMath::Matrix m_proj;
-	float m_rotationRadiansPS = 0.0f;
-	float m_cameraRotationX		= 0.0f;
-	float m_cameraRotationY		= 0.0f;
+  DirectX::SimpleMath::Matrix m_gridWorld;
+  DirectX::SimpleMath::Matrix m_modelWorld;
+  DirectX::SimpleMath::Matrix m_view;
+  DirectX::SimpleMath::Matrix m_proj;
+  float m_rotationRadiansPS = 0.0f;
+  float m_cameraRotationX   = 0.0f;
+  float m_cameraRotationY   = 0.0f;
 };
